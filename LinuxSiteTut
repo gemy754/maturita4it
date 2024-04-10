@@ -1,0 +1,173 @@
+1. Nainstalujte OS GNU/Linux
+a) Při instalaci vytvořte oddíl disku pro domovský adresář s šifrováním.
+Při instalaci vyberte možnost vytvoření oddílu disku pro domovský adresář a zvolte šifrování.
+
+b) Nastavte název počítače na big-machine
+sudo hostnamectl set-hostname big-machine
+
+c) Vytvořte uživatele "maturita":
+sudo adduser --full-name "maturitní zkouška" maturita
+Následujte instrukce pro zadání hesla.
+
+d) Nakrimpujte kroucenou dvojlinku ve variantě T568B do ethernetové zásuvky.
+
+2. Vytvoření dalších uživatelů
+a) Vytvoření uživatele "Admin":
+arduino
+Copy code
+sudo adduser --full-name "Linux administrátor" admin
+sudo usermod -aG sudo admin
+sudo passwd admin
+Následujte instrukce pro zadání hesla.
+
+b) Vytvoření uživatele "Alan":
+arduino
+Copy code
+sudo adduser --full-name "Alan Delon" alan
+sudo passwd alan
+Následujte instrukce pro zadání hesla.
+
+3. Příkazy v programu Nano
+Copy code
+nano
+V editoru Nano vepište následující příkazy:
+
+a) Překopírování složky Dokumenty do složky tmp:
+bash
+Copy code
+cp -r ~/Dokumenty /tmp
+
+b) Ukončení procesu s PID 15658:
+bash
+Copy code
+kill 15658
+
+c) Vytvoření složky Script v domovském adresáři:
+arduino
+Copy code
+mkdir ~/Script
+
+d) Vytvoření souboru test.sh a nastavení oprávnění:
+bash
+Copy code
+touch ~/test.sh
+chmod ug+x ~/test.sh
+
+e) Změna vlastníka souboru test.sh na uživatele alan:
+bash
+Copy code
+sudo chown alan ~/test.sh
+
+f) Výpis všech aktuálně běžících procesů:
+Copy code
+ps aux
+
+4. Periodické spuštění skriptu pomocí Cronu
+Otevřete cron nastavení:
+Copy code
+crontab -e
+Přidejte tento řádek pro spuštění každé pondělí v 1 hodinu:
+
+bash
+Copy code
+0 1 * * 1 /cesta/k/test.sh
+Pro naplánování operací můžete také použít program systemd-timer.
+
+5. Instalace programů
+sql
+Copy code
+sudo apt update
+sudo apt install inkscape
+sudo apt install default-jdk
+sudo snap install intellij-idea-community --classic
+
+6. Instalace služeb DHCP a DNS
+a) Instalace DHCP a DNS:
+Copy code
+sudo apt install isc-dhcp-server
+sudo apt install bind9
+b) Nakonfigurujte DHCP:
+
+bash
+Copy code
+sudo nano /etc/dhcp/dhcpd.conf
+Přidejte konfiguraci pro přídělování IP adres a rezervaci pro zařízení:
+
+php
+Copy code
+subnet <adresa_sítě> netmask <maska_sítě> {
+  range <první_adresa> <poslední_adresa>;
+  host maturant {
+    hardware ethernet 70:85:E3:2A:FE:05;
+    fixed-address <rezervovaná_adresa>;
+  }
+}
+c) Konfigurace DNS:
+
+bash
+Copy code
+sudo nano /etc/bind/named.conf.local
+Přidejte zónu a záznamy MX, CNAME, A, NS:
+
+bash
+Copy code
+zone "udelatko.net" {
+    type master;
+    file "/etc/bind/zones/udelatko.net.zone";
+};
+Vytvořte zónový soubor:
+
+bash
+Copy code
+sudo nano /etc/bind/zones/udelatko.net.zone
+A přidejte záznamy:
+
+python
+Copy code
+$TTL    604800
+@       IN      SOA     udelatko.net. admin.udelatko.net. (
+                     2024041001     ; Serial
+                         604800     ; Refresh
+                          86400     ; Retry
+                        2419200     ; Expire
+                         604800 )   ; Negative Cache TTL
+;
+@       IN      NS      ns.udelatko.net.
+@       IN      MX 10   mail.udelatko.net.
+@       IN      A       <IP_adresa_serveru>
+www     IN      CNAME   udelatko.net.
+ns      IN      A       <IP_adresa_serveru>
+admin   IN      A       <IP_adresa_admin>
+7. Zobrazení stavu služeb
+lua
+Copy code
+sudo systemctl status cron
+sudo systemctl status isc-dhcp-server
+sudo systemctl status bind9
+8. Instalace a konfigurace LAMP serveru
+bash
+Copy code
+sudo apt install apache2 mysql-server php libapache2-mod-php
+sudo systemctl enable apache2
+sudo systemctl start apache2
+Konfigurace Apache pro /mujweb:
+
+bash
+Copy code
+sudo nano /etc/apache2/sites-available/mujweb.conf
+Přidejte konfiguraci:
+
+css
+Copy code
+Alias /mujweb /var/www/mujweb
+<Directory /var/www/mujweb>
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Require all granted
+</Directory>
+Aktivujte konfiguraci:
+
+Copy code
+sudo a2ensite mujweb
+sudo systemctl reload apache2
+Tímto jste dokončili nastavení požadovaných funkcí v systému Linux. Budete moci používat vaše nově nastavené prostředí.
