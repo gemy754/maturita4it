@@ -13,16 +13,12 @@ d) Nakrimpujte kroucenou dvojlinku ve variantě T568B do ethernetové zásuvky.
 
 2. Vytvoření dalších uživatelů
 a) Vytvoření uživatele "Admin":
-arduino
-Copy code
 sudo adduser --full-name "Linux administrátor" admin
 sudo usermod -aG sudo admin
 sudo passwd admin
 Následujte instrukce pro zadání hesla.
 
 b) Vytvoření uživatele "Alan":
-arduino
-Copy code
 sudo adduser --full-name "Alan Delon" alan
 sudo passwd alan
 Následujte instrukce pro zadání hesla.
