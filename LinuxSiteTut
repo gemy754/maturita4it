@@ -58,10 +58,11 @@ f) Výpis všech aktuálně běžících procesů:
 ps aux
 
 4. Periodické spuštění skriptu pomocí Cronu
-Otevřete cron nastavení:
+//Otevřete cron nastavení:
 crontab -e
 1 (pokud to chceme nastavit v nano)
 0 1 * * * ~/test.sh
+//můžeme použít i příkat at, ale ten msíme naisntalovat
 
 5. Instalace programů
 sudo apt update
@@ -97,6 +98,53 @@ Kontrola jestli dhvp funguje: service isc-dhcp-server status
 Spuštění: service isc-dhcp-server start
 
 c) Konfigurace DNS:
+//zkotrolujte si že jse v cestě /etc/bind pro tento úkol
+//Zkontrolujeme zda se nám nainstalovalo DNS
+service bind9 status
+//configy jsou uloženy v /etc/bind nejdůležitěšjší je named.conf
+//nejjednoduší způsob je napsat cat named.conf.default-zones a tam si zkopírovat nějakou náhodnou zónu, třeba tu první jako to dělal Smišťa
+//pro vytvoření vlastního souboru se zónou napíšeme příkaz sudo nano named.conf.udelatko.net
+//do souboru vložíme tu zkopírovanou zónu
+zone "udelatko.net" {
+        type master;
+        file "etc/bind/udelatko.net";
+};
+//tak teď ten soubor přidáme do named.conf
+include "/etc/bind/named.conf.udelatko.net";
+//teď aby jsme to měli snadný zkopírujeme soubor a mi ho jen upravíme, sudo cp db.local udelatko.net
+//ten si otevřeme v nano to udelatko.net a upravíme ho takto !!pozor udelatko.net. a admin.udelatko.net. ty tečky tam jsou důležité
+//2024041001 (ROK/MĚSÍC/DEN/POŘADOVÉ ČÍSLO)
+//pokud v zadání nejsou definované časy kdy se to má refreshnout tak tam je jedno co tam bude, můžete tam nechat i ty defaultní v sekundách, ale takhle to bude vypadat líp (a třeba za to dostanete extra body to nevím)
+;
+; BIND data file for udelatko.net
+;
+$TTL    5h
+@       IN      SOA     udelatko.net. admin.udelatko.net. (
+                     2024041001     ; Serial
+                             3h     ; Refresh
+                            30m     ; Retry
+                            10h     ; Expire
+                             5h )   ; Negative Cache TTL
+;
+@       IN      NS      udelatko.net.
+@       IN      A       192.168.66.60 //ip adresa počítače
+        IN      M 10    mail.udelatko.net. //10 je priorita aby server věděl jaký má email brát jako výchozí
+mail    IN      A       192.168.66.59
+www     IN      A       192.168.66.58
+web     IN      CNAME   www.udelatko.net
+//uložíme
+sudo service bind9 restart
+sudo service bind9 status //pro zkontrolování
+ping www.udelatko.net //pro zkontrolování 
+//pokud nefunguje a píše to neznáme jméno nebo služba
+sudo nano /etc/resolv.conf
+nameserver 127.0.0.1
+search scmsd.local
+//vše ostatní tam být nemusí
+//znovu to pingneme pro kontrolu, pokud to zase píše chybu, tak jste udělali něco blbě, nebo já něco blbě napsal, takže se teď začněte modlit
+ping www.udelatko.net
+dig udelatko.net //pro ještě další kontrolu
+(bot)
 sudo nano /etc/bind/named.conf.local
 Přidejte zónu a záznamy MX, CNAME, A, NS:
 
@@ -125,11 +173,61 @@ ns      IN      A       <IP_adresa_serveru>
 admin   IN      A       <IP_adresa_admin>
 
 7. Zobrazení stavu služeb
+service isc-dhcp-server status
+//ukončíme ctr + c aby jsme zase mohli psát do konzole
+//druhý způsob
+/etc/init.d/isc-dhcp-server status
+/etc/init.d/bind9 status //napsalo mu to adresář nebo soubor neexistuje neřešil nebo si toho nevšiml, takže zkuste service bind9 status
+/etc/init.d/cron status
+
+(bot)
 sudo systemctl status cron
 sudo systemctl status isc-dhcp-server
 sudo systemctl status bind9
 
 8. Instalace a konfigurace LAMP serveru
+sudo apt install tasksel //nejmíň náročná obsluha instalace
+sudo tasksel //najdeme si LAMP server a zapneme ho, dáme pak klávesu TAB a odentrujeme OK
+//přejdeme na cestu /etc/apache2
+cd sites-available
+sudo cp 000-default.conf udelatko.net.conf //stjný postup jako při DNS prostě čmajzneme soubor aby jsme všechno nemuseli psát
+sudo nano udelatko.net.conf
+//promažeme pár věcí a komentářů výsledek jako ve videu: 
+<VirtualHost *:80>
+        ServerName www.udelatko.net
+        ServerAdmin sebmaster@localhost 
+        DocumentRoot /mujweb
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+  	    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+//ctr + x pro uložení
+sudo mkdir /mujweb
+cd /mujweb/
+//uložímě si index
+sudo nano index.html
+Ahoj
+//ctrl + x
+sudo a2ensite udelatko.net.conf
+sudo /etc/init.d/apache2 reload //nebo můžeme použít sudo service apache2 reload
+//gratuluji dokončili jste maturitu
+//teď jen malá úprava
+sudo nano /etc/hosts
+127.0.0.1 www.udelatko.net
+ping www.udelatko.net
+//vyhledat www.udelatko.net
+//upravení oprávnění pro to aby se nám zobrazila stránka
+cd /etc/apache2/conf-available/
+sudo nano udelatko.conf
+<Directory /mujweb>
+DirectoryIndex index.html
+Require all granted
+Allow from All
+</Directory>
+//ctr + x
+sudo a2enconf udelatko
+sudo /etc/init.d/apache2 restart //nebo můžeme použít sudo service apache2 restart
+
+(bot)
 sudo apt install apache2 mysql-server php libapache2-mod-php
 sudo systemctl enable apache2
 sudo systemctl start apache2
