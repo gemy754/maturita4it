@@ -38,7 +38,7 @@ chmod ug+x test.sh //to jsou ty skupiny
 chown alan test.sh //změnit vlastníka na alana
 ps -A //vypíše to všechny procesy
 
-Copy code
+(bot)
 nano
 V editoru Nano vepište následující příkazy:
 
