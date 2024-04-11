@@ -1,0 +1,92 @@
+PSS(Linux)
+
+2. Vytvoření admina:
+•	Sudo mkdir  -p /admin/data (Tímto vytvořím domovský adresář)
+•	Sudo useradd -d /admin/data -s /bin/bash admin (Tímto vytvořím admina)
+•	Sudo passwd admin (Tímto vytvořím heslo pro admina)
+•	Sudo nano /etc/passwd (Napíšu jmeno v adresáři, Linux Administrator)Sudo 
+•	Sudo nano /etc/group ( přidám oprávnění k adminovi: adm, sudo)
+•	Sudo cp -R /etc/skel /admin/data (Překopírování dat z skel)
+•	Sudo Chown admin data (Oprávnění pro admina, být v rootu /admin#)
+•	Sudo Chmod 700 data (Odebrání rootu) 
+•	ll /admin/data (Podívání do složky data)
+•	cd /admin/data (adresář)
+•	su admin (přihlášení admina)
+•	cd ~ (Domovský adresář)
+
+ Vytvoření uživatele:
+•	Sudo groupadd delon (Vytvoření skupiny delon)
+•	Sudo adduser alan (vytvoření uživatele alan)
+•	Sudo nano /etc/group (přidání alana ke skupině delon)
+•	Sudo Sudo chgrp delon alan (alan ve složce delon)
+•	Sudo Chmod 740 alan (pouze na čtení v adresáři)
+•	Su alan (Přihlášení na alana)
+
+3. Vložení příkazu:
+•	Sudo nano test.sh
+1.	Cp -R ~/Dokumenty /tmp
+2.	Kill -kill 15658
+3.	Mkdir ~/Script
+4.	Touch test.sh
+5.	Chmod ug+x test.sh
+6.	Chown alan test.sh
+7.	Ps -A
+
+4. Spuštení scriptu každě pondělí v 1 hodinu
+•	Crontab -e (upravení cronu)
+1.	0 1 * * * ~/test.sh
+
+5. Instalace Inkscape
+•	Sudo apt update (aktualizace)
+•	Sudo apt install inkscape ( instalace inkscape)
+•	Sudo snap install  –-classic intelliJ idea ...(možné stáhnutí na ubuntu software)
+
+
+
+
+
+
+
+6. Nainstalování DHCP a DNS a její konfigurace
+•	Sudo apt install isc
+•	Sudo apt install isc-dhcp-server (instalování DHCP)
+•	Sudo apt install bind9  (instalování DNS)
+•	Sudo nano /etc/dhcp/dhcpd.conf (konfigurace DHCP)
+1.	Subnet 192.168.66.0 netmask 255.255.255.192{
+Range 192.168.66.1	192.168.66.50
+}
+
+Host maturant{
+Hardware ethernet 70:85:E3:2A:FE:05
+}
+•	Sudo nano /etc/default/isc-dhcp-server
+1. INTERFACE=“enp0s8“ (přidání interface)
+•	Sudo ip a a 192.168.66.60/26 dev enp0s8 (přidání ip adresy na broadcast)
+•	Ip a (zkontrolování ip adresy)
+•	Service isc-dhcp-server status( status )
+•	Service isc-dhcp-server start( start )
+•	Service bind9 status( status )
+•	Cd /etc/bind (složka bind)
+•	Ls( co je ve složce)
+•	Sudo Cat named.conf.default-zones ( kopírování local hosta)
+•	Sudo nano named.conf.udelatko.net (Vložení vlastní zony)
+•	Sudo nano named.conf (přidání: include“/etc/bindnamed.conf.udelatko.net“;
+•	Sudo cat named.conf.udelatko.net (informace o zone udelatko.net)
+
+7. Zobrazení stavu služeb
+•	Service isc-dhcp-server status( status )
+•	Service bind9 status( status )
+•	Service cron status (status)
+
+8. Instalace LAMP serveru a Apache
+•	Sudo apt install tasksel(instalce)
+•	Tasksel (DNS, LAMP, Print server, Ubuntu desktop, Ubuntu minimal desktop)
+•	Cd apache2/
+•	Cd sites-available
+•	Ls
+•	Sudo cp 000-default.conf.net.conf
+•	Sudo nano udelatko.net.conf( Server name: www.udelatko.net; DocumentRoot  /mujweb)
+•	Sudo mkdir /mujweb
+•	Sudo nano index.html(ahoj)
+•	Sudo a2ensite udelatko.net.conf
+•	/etc/init.d/apache2 reload
